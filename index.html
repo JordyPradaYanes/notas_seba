@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Registro Académico — Ingeniería Civil</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --blueprint: #1B3A5C;
+  --blueprint-deep: #12283F;
+  --grid-line: rgba(255,255,255,0.07);
+  --paper: #F7F4EC;
+  --paper-line: #D9D2BF;
+  --ink: #1B2430;
+  --ink-soft: #5B6472;
+  --accent: #E8622C;
+  --accent-dark: #C74E1E;
+  --ok: #3C8A5B;
+  --warn: #C74E1E;
+  --font-display: 'Space Mono', monospace;
+  --font-body: 'IBM Plex Sans', sans-serif;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+    var(--blueprint);
+  min-height: 100vh;
+  padding: 18px 12px 60px;
+}
+
+.sheet{
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ---------- TITLE BLOCK ---------- */
+.titleblock{
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  overflow: hidden;
+}
+.titleblock-top{
+  padding: 18px 20px 14px;
+  border-bottom: 2px solid var(--ink);
+}
+.titleblock-top .eyebrow{
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--accent-dark);
+  text-transform: uppercase;
+}
+.titleblock-top h1{
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 5.5vw, 30px);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.titleblock-fields{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.tb-field{
+  padding: 10px 14px;
+  border-right: 1px solid var(--paper-line);
+  border-top: 1px solid var(--paper-line);
+}
+.tb-field:nth-child(3n){border-right:none;}
+.tb-field .label{
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+.tb-field .value{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  margin-top: 2px;
+}
+.tb-field .value.accent{ color: var(--accent-dark); }
+
+/* ---------- SEMESTER TABS ---------- */
+.tabs{
+  display: flex;
+  gap: 6px;
+  margin: 18px 0 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.tab{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  padding: 9px 14px;
+  background: rgba(247,244,236,0.12);
+  color: var(--paper);
+  border: 1.5px solid rgba(247,244,236,0.35);
+  border-radius: 3px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.tab.active{
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.tab-add{
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--paper);
+  border: 1.5px dashed rgba(247,244,236,0.45);
+  background: transparent;
+}
+
+/* ---------- SHEET CARD (materias list) ---------- */
+.card{
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  padding: 16px 16px 18px;
+  margin-bottom: 14px;
+}
+.card h2{
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  display:flex;
+  justify-content: space-between;
+  align-items:baseline;
+}
+.card h2 span.n{ color: var(--ink); font-size: 15px; }
+
+.materia-row{
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--paper-line);
+}
+.materia-row:last-of-type{ border-bottom: none; }
+.materia-nombre{
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+.materia-meta{
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+.materia-nota{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 42px;
+  text-align: right;
+}
+.materia-nota.baja{ color: var(--warn); }
+.materia-nota.buena{ color: var(--ok); }
+.icon-btn{
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 4px 6px;
+  line-height: 1;
+  color: var(--ink-soft);
+}
+.icon-btn:hover{ color: var(--accent-dark); }
+.empty-state{
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  padding: 10px 0;
+}
+
+/* ---------- ADD FORM ---------- */
+.add-form{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 2px solid var(--ink);
+}
+.add-form .row2{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.field{
+  display:flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field label{
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.field input{
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 9px 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  background: #fff;
+  color: var(--ink);
+  width: 100%;
+}
+.field input:focus{
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.btn{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 11px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.btn:active{ transform: translateY(1px); }
+.btn.secondary{
+  background: transparent;
+  color: var(--ink);
+}
+
+/* ---------- SUMMARY ---------- */
+.summary-strip{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+.summary-box{
+  background: rgba(247,244,236,0.12);
+  border: 1.5px solid rgba(247,244,236,0.35);
+  border-radius: 2px;
+  padding: 12px 14px;
+  color: var(--paper);
+}
+.summary-box .label{
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.summary-box .val{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  margin-top: 3px;
+}
+
+.save-note{
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: rgba(247,244,236,0.55);
+  margin-top: 16px;
+  min-height: 16px;
+  transition: opacity 0.4s;
+}
+
+.hidden{ display: none !important; }
+
+@media (max-width: 420px){
+  .materia-row{ grid-template-columns: 1fr auto auto; }
+  .materia-meta{ display:block; }
+}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <div class="titleblock">
+    <div class="titleblock-top">
+      <div class="eyebrow">Registro académico · Hoja de notas</div>
+      <h1>Ingeniería Civil</h1>
+    </div>
+    <div class="titleblock-fields">
+      <div class="tb-field">
+        <div class="label">Semestres</div>
+        <div class="value" id="tbSemestres">—</div>
+      </div>
+      <div class="tb-field">
+        <div class="label">Créditos totales</div>
+        <div class="value" id="tbCreditos">—</div>
+      </div>
+      <div class="tb-field">
+        <div class="label">Promedio general</div>
+        <div class="value accent" id="tbPromedio">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="card">
+    <h2>Semestre <span class="n" id="semLabel">—</span></h2>
+    <div id="materiasList"></div>
+
+    <form class="add-form" id="addForm">
+      <div class="field">
+        <label for="fNombre">Nombre de la materia</label>
+        <input type="text" id="fNombre" placeholder="Ej: Resistencia de Materiales" required>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="fNota">Nota (0.0 – 5.0)</label>
+          <input type="number" id="fNota" step="0.1" min="0" max="5" placeholder="4.2" required>
+        </div>
+        <div class="field">
+          <label for="fCreditos">Créditos</label>
+          <input type="number" id="fCreditos" step="1" min="1" max="10" placeholder="3" required>
+        </div>
+      </div>
+      <button type="submit" class="btn">+ Añadir materia</button>
+    </form>
+  </div>
+
+  <div class="summary-strip">
+    <div class="summary-box">
+      <div class="label">Promedio semestre</div>
+      <div class="val" id="semPromedio">—</div>
+    </div>
+    <div class="summary-box">
+      <div class="label">Créditos semestre</div>
+      <div class="val" id="semCreditos">—</div>
+    </div>
+  </div>
+
+  <div class="save-note" id="saveNote"></div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'materias_v1';
+let materias = [];
+let currentSemestre = 1;
+let storageAvailable = true;
+
+const seedData = [
+  {nombre:"Calculo Diferencial", nota:3.5, creditos:4, semestre:1},
+  {nombre:"Quimica de Materiales", nota:3.9, creditos:3, semestre:1},
+  {nombre:"Programación de Computadores", nota:3.5, creditos:3, semestre:1},
+  {nombre:"Geometria Descriptiva", nota:2.7, creditos:2, semestre:1},
+  {nombre:"Introducción a la Ingeniería", nota:4.4, creditos:2, semestre:1},
+  {nombre:"Comunicación Social 1", nota:4.4, creditos:2, semestre:1},
+  {nombre:"Geometria Descriptiva", nota:3.4, creditos:2, semestre:2},
+  {nombre:"Calculo Integral", nota:2.9, creditos:4, semestre:2},
+  {nombre:"Fisica Mecánica", nota:4.2, creditos:4, semestre:2},
+  {nombre:"Fundamento Base de Datos", nota:3.4, creditos:3, semestre:2},
+  {nombre:"Algebra Lineal", nota:3.4, creditos:3, semestre:2},
+  {nombre:"Comunicación Social 2", nota:4.7, creditos:2, semestre:2},
+  {nombre:"Constitución y Civismo", nota:4.7, creditos:2, semestre:2},
+  {nombre:"CALCULO INTEGRAL", nota:4.5, creditos:4, semestre:3},
+  {nombre:"DIBUJO ASISTIDO POR COMPUTADOR", nota:3.6, creditos:2, semestre:3},
+  {nombre:"ELECTROMAGNETISMO", nota:3.8, creditos:4, semestre:3},
+  {nombre:"ESTÁTICA", nota:2.8, creditos:3, semestre:3},
+  {nombre:"VECTORIAL", nota:3.8, creditos:4, semestre:4},
+  {nombre:"ESTATICA", nota:3.5, creditos:3, semestre:4},
+  {nombre:"TOPOGRAFIA", nota:3.4, creditos:4, semestre:4},
+  {nombre:"ONDAS Y PARTICULAS", nota:3.9, creditos:3, semestre:4},
+  {nombre:"ECUACIONES DIFERENCIALES", nota:4.1, creditos:4, semestre:4},
+];
+
+function uid(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+async function loadData(){
+  try{
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if(result && result.value){
+      materias = JSON.parse(result.value);
+    } else {
+      materias = seedData.map(m => ({...m, id: uid()}));
+      await saveData(true);
+    }
+  } catch(e){
+    // key not found yet, or storage unavailable -> seed
+    try{
+      materias = seedData.map(m => ({...m, id: uid()}));
+      await saveData(true);
+    } catch(e2){
+      storageAvailable = false;
+      materias = seedData.map(m => ({...m, id: uid()}));
+    }
+  }
+}
+
+async function saveData(silent){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(materias), false);
+    if(!silent) flashSaveNote('Guardado ✓');
+  } catch(e){
+    storageAvailable = false;
+    if(!silent) flashSaveNote('No se pudo guardar en este dispositivo');
+  }
+}
+
+let flashTimer = null;
+function flashSaveNote(text){
+  const note = document.getElementById('saveNote');
+  note.textContent = text;
+  note.style.opacity = '1';
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(()=>{ note.style.opacity = '0'; }, 1800);
+}
+
+function getSemestres(){
+  const set = new Set(materias.map(m => m.semestre));
+  return Array.from(set).sort((a,b)=>a-b);
+}
+
+function calcPromedio(lista){
+  let suma = 0, creditos = 0;
+  lista.forEach(m => { suma += m.nota * m.creditos; creditos += m.creditos; });
+  if(creditos === 0) return {promedio: null, creditos: 0};
+  return {promedio: Math.round((suma/creditos)*100)/100, creditos};
+}
+
+function render(){
+  const semestres = getSemestres();
+  if(!semestres.includes(currentSemestre)){
+    currentSemestre = semestres.length ? semestres[0] : 1;
+  }
+
+  // Tabs
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  semestres.forEach(s => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (s === currentSemestre ? ' active' : '');
+    t.textContent = 'SEM ' + s;
+    t.onclick = () => { currentSemestre = s; render(); };
+    tabsEl.appendChild(t);
+  });
+  const addTab = document.createElement('button');
+  addTab.className = 'tab tab-add';
+  addTab.textContent = '+ Semestre';
+  addTab.onclick = () => {
+    const next = semestres.length ? Math.max(...semestres) + 1 : 1;
+    currentSemestre = next;
+    document.getElementById('fNombre').focus();
+    render();
+  };
+  tabsEl.appendChild(addTab);
+
+  document.getElementById('semLabel').textContent = currentSemestre;
+
+  // Materias list for current semester
+  const listEl = document.getElementById('materiasList');
+  listEl.innerHTML = '';
+  const enSemestre = materias.filter(m => m.semestre === currentSemestre);
+
+  if(enSemestre.length === 0){
+    listEl.innerHTML = '<div class="empty-state">Aún no hay materias en este semestre. Añade la primera abajo.</div>';
+  } else {
+    enSemestre.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'materia-row';
+      const notaClass = m.nota < 3.0 ? 'baja' : (m.nota >= 4.0 ? 'buena' : '');
+      row.innerHTML = `
+        <div>
+          <div class="materia-nombre">${escapeHtml(m.nombre)}</div>
+          <div class="materia-meta">${m.creditos} crédito${m.creditos===1?'':'s'}</div>
+        </div>
+        <div class="materia-nota ${notaClass}">${m.nota.toFixed(1)}</div>
+        <button class="icon-btn" title="Editar" data-action="edit" data-id="${m.id}">✎</button>
+        <button class="icon-btn" title="Eliminar" data-action="del" data-id="${m.id}">✕</button>
+      `;
+      listEl.appendChild(row);
+    });
+  }
+
+  listEl.querySelectorAll('[data-action="del"]').forEach(btn => {
+    btn.onclick = () => {
+      const m = materias.find(x => x.id === btn.dataset.id);
+      if(m && confirm(`¿Eliminar "${m.nombre}"?`)){
+        materias = materias.filter(x => x.id !== btn.dataset.id);
+        saveData();
+        render();
+      }
+    };
+  });
+  listEl.querySelectorAll('[data-action="edit"]').forEach(btn => {
+    btn.onclick = () => {
+      const m = materias.find(x => x.id === btn.dataset.id);
+      if(!m) return;
+      const nuevoNombre = prompt('Nombre de la materia:', m.nombre);
+      if(nuevoNombre === null) return;
+      const nuevaNota = prompt('Nota (0.0 - 5.0):', m.nota);
+      if(nuevaNota === null) return;
+      const nuevosCreditos = prompt('Créditos:', m.creditos);
+      if(nuevosCreditos === null) return;
+      const nota = parseFloat(nuevaNota);
+      const creditos = parseInt(nuevosCreditos, 10);
+      if(nuevoNombre.trim() === '' || isNaN(nota) || nota<0 || nota>5 || isNaN(creditos) || creditos<1){
+        alert('Datos inválidos. No se guardaron los cambios.');
+        return;
+      }
+      m.nombre = nuevoNombre.trim();
+      m.nota = nota;
+      m.creditos = creditos;
+      saveData();
+      render();
+    };
+  });
+
+  // Semester summary
+  const semResult = calcPromedio(enSemestre);
+  document.getElementById('semPromedio').textContent = semResult.promedio !== null ? semResult.promedio.toFixed(2) : '—';
+  document.getElementById('semCreditos').textContent = semResult.creditos;
+
+  // Title block
+  const general = calcPromedio(materias);
+  document.getElementById('tbSemestres').textContent = semestres.length;
+  document.getElementById('tbCreditos').textContent = general.creditos;
+  document.getElementById('tbPromedio').textContent = general.promedio !== null ? general.promedio.toFixed(2) : '—';
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById('fNombre').value.trim();
+  const nota = parseFloat(document.getElementById('fNota').value);
+  const creditos = parseInt(document.getElementById('fCreditos').value, 10);
+
+  if(nombre === '' || isNaN(nota) || nota < 0 || nota > 5 || isNaN(creditos) || creditos < 1){
+    alert('Revisa los datos: nota entre 0.0 y 5.0, créditos mínimo 1.');
+    return;
+  }
+
+  materias.push({ id: uid(), nombre, nota, creditos, semestre: currentSemestre });
+  await saveData();
+  e.target.reset();
+  render();
+});
+
+(async function init(){
+  await loadData();
+  render();
+  if(!storageAvailable){
+    flashSaveNote('Aviso: este dispositivo no guarda los datos automáticamente');
+  }
+})();
+</script>
+
+</body>
+</html>
