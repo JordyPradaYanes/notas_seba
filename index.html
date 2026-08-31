@@ -425,8 +425,9 @@ body{
 </div>
 
 <script>
-const STORAGE_KEY = 'materias_v1';
+const STORAGE_KEY = 'materias_v2';
 let materias = [];
+let semestresExtra = [];   // semestres creados aunque estén vacíos
 let currentSemestre = 1;
 let storageAvailable = true;
 
@@ -478,26 +479,31 @@ async function loadData(){
   try{
     const result = await store.get(STORAGE_KEY);
     if(result && result.value){
-      materias = JSON.parse(result.value);
+      const parsed = JSON.parse(result.value);
+      materias = parsed.materias || [];
+      semestresExtra = parsed.semestres || [];
     } else {
       materias = seedData.map(m => ({...m, id: uid()}));
+      semestresExtra = [];
       await saveData(true);
     }
   } catch(e){
-    // key not found yet, or storage unavailable -> seed
     try{
       materias = seedData.map(m => ({...m, id: uid()}));
+      semestresExtra = [];
       await saveData(true);
     } catch(e2){
       storageAvailable = false;
       materias = seedData.map(m => ({...m, id: uid()}));
+      semestresExtra = [];
     }
   }
 }
 
 async function saveData(silent){
   try{
-    await store.set(STORAGE_KEY, JSON.stringify(materias));
+    const payload = { materias, semestres: getSemestres() };
+    await store.set(STORAGE_KEY, JSON.stringify(payload));
     if(!silent) flashSaveNote('Guardado ✓');
   } catch(e){
     storageAvailable = false;
@@ -515,7 +521,7 @@ function flashSaveNote(text){
 }
 
 function getSemestres(){
-  const set = new Set(materias.map(m => m.semestre));
+  const set = new Set([...materias.map(m => m.semestre), ...semestresExtra]);
   return Array.from(set).sort((a,b)=>a-b);
 }
 
@@ -545,11 +551,13 @@ function render(){
   const addTab = document.createElement('button');
   addTab.className = 'tab tab-add';
   addTab.textContent = '+ Semestre';
-  addTab.onclick = () => {
+  addTab.onclick = async () => {
     const next = semestres.length ? Math.max(...semestres) + 1 : 1;
+    if (!semestresExtra.includes(next)) semestresExtra.push(next);
     currentSemestre = next;
-    document.getElementById('fNombre').focus();
+    await saveData(true);   // persiste el semestre vacío inmediatamente
     render();
+    document.getElementById('fNombre').focus();
   };
   tabsEl.appendChild(addTab);
 
